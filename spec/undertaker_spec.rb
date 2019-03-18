@@ -15,7 +15,7 @@ RSpec.describe Undertaker do
         Undertaker.enable do
           Undertaker::TestClass.foo
         end
-      end.to change{ Undertaker::ClassMethodWrapper.new(Undertaker::TestClass).send(:potentially_unused_methods).include?("foo") }.from(true).to(false)
+      end.to change{ Undertaker::Report.unused_methods_for(Undertaker::TestClass.name) }.from(["Undertaker::TestClass.foo"]).to([])
 
       expect(Undertaker.config.storage.pending_deletions).to be_empty
     end

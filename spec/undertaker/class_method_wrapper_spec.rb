@@ -106,7 +106,7 @@ RSpec.describe Undertaker::ClassMethodWrapper do
 
       expect do
         anonymous_class.bar
-      end.to change { wrapper.send(:potentially_unused_methods).include?("bar") }
+      end.to change { Undertaker::Report.unused_methods_for(anonymous_class.name).include?("#{anonymous_class.name}.bar") }
         .from(true)
         .to(false)
     end

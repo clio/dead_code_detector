@@ -5,6 +5,7 @@ require "undertaker/instance_method_wrapper"
 require "undertaker/storage"
 require "undertaker/initializer"
 require "undertaker/configuration"
+require "undertaker/report"
 
 module Undertaker
 

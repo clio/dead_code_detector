@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    undertaker (0.0.2.alpha)
+    undertaker (0.0.3.alpha)
 
 GEM
   remote: https://rubygems.org/
