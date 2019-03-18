@@ -11,22 +11,23 @@ RSpec.describe Undertaker::Initializer do
 
   describe ".allowed?" do
     before do
-      redis_double = double
-      expect(redis_double).to receive(:incr).and_return(1,2)
-      expect(redis_double).to receive(:expire).with("Undertaker::Initializer/lock", 60)
-      allow(Undertaker.config).to receive(:redis).and_return(redis_double)
+      count = 0
+      allow(Undertaker.config).to receive(:allowed).and_return(->{
+        count += 1
+        count == 1
+      })
     end
-    it "is true for the first call and false for all subsequent calls within the expiry period" do
+    it "is true for the first call and false for all subsequent calls" do
       expect(described_class).to be_allowed
       expect(described_class).to_not be_allowed
     end
   end
 
-  describe ".setup_for" do
+  describe ".refresh_cache_for" do
     it "marks the class as being tracked" do
       expect do
-        described_class.setup_for(anonymous_class)
-      end.to change{ Undertaker::Initializer.tracked_classes.include?(anonymous_class.name) }
+        described_class.refresh_cache_for(anonymous_class)
+      end.to change{ Undertaker::Initializer.cached_classes.include?(anonymous_class.name) }
         .from(false)
         .to(true)
     end
@@ -35,7 +36,7 @@ RSpec.describe Undertaker::Initializer do
 
   describe ".enable" do
     before do
-      described_class.setup_for(anonymous_class)
+      described_class.refresh_cache_for(anonymous_class)
     end
 
     it "wraps the class methods" do

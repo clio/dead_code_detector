@@ -2,7 +2,7 @@ require "bundler/setup"
 require "undertaker"
 
 Undertaker.configure do |config|
-  config.backend = :memory
+  config.storage = :memory
 end
 
 RSpec.configure do |config|

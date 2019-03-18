@@ -4,9 +4,7 @@ module Undertaker
     class << self
       def unwrap_method(klass, original_method)
         if klass.singleton_class == original_method.owner
-          klass.class_eval do
-            define_singleton_method(original_method.name, original_method)
-          end
+          klass.define_singleton_method(original_method.name, original_method)
         else
           klass.singleton_class.send(:remove_method, original_method.name)
         end
@@ -26,24 +24,22 @@ module Undertaker
 
     def wrap_method(original_method)
       original_class = klass
-      original_class.class_eval do
-        define_singleton_method(original_method.name) do |*args, &block|
-          begin
-            Undertaker::ClassMethodWrapper.unwrap_method(original_class, original_method)
-          rescue StandardError => e
-            if Undertaker.config.error_handler
-              Undertaker.config.error_handler.call(e)
-            end
+      klass.define_singleton_method(original_method.name) do |*args, &block|
+        begin
+          Undertaker::ClassMethodWrapper.unwrap_method(original_class, original_method)
+        rescue StandardError => e
+          if Undertaker.config.error_handler
+            Undertaker.config.error_handler.call(e)
           end
-          # We may have a method like `ApplicationRecord.sti_name`
-          # that begins bound to `ApplicationRecord`
-          # However, it may be called from `Matter.sti_name`
-          # We need to bind the original method to the class that
-          # is calling the method
-          unbound_method = original_method.unbind
-          method_bound_to_caller = unbound_method.bind(self)
-          method_bound_to_caller.call(*args, &block)
         end
+        # We may have a method like `ActiveRecord::Base.sti_name`
+        # that begins bound to `ActiveRecord::Base`
+        # However, it may be called from `User.sti_name`
+        # We need to bind the original method to the class that
+        # is calling the method
+        unbound_method = original_method.unbind
+        method_bound_to_caller = unbound_method.bind(self)
+        method_bound_to_caller.call(*args, &block)
       end
     end
 

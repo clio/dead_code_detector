@@ -3,19 +3,17 @@ module Undertaker
 
     class << self
 
-      def setup_all
-        Undertaker.config.tracked_classes.each do |klass|
-          setup_for(klass)
+      def refresh_caches
+        Undertaker.config.classes_to_monitor.each do |klass|
+          refresh_cache_for(klass)
         end
       end
 
-      def setup_for(klass)
+      def refresh_cache_for(klass)
         @enabled = false
         classes = [klass, *descendants_of(klass)]
         classes.each do |class_to_enable|
-          track_class(class_to_enable)
-          Undertaker::ClassMethodWrapper.new(class_to_enable).refresh_cache
-          Undertaker::InstanceMethodWrapper.new(class_to_enable).refresh_cache
+          cache_methods_for(class_to_enable)
         end
       end
 
@@ -24,26 +22,26 @@ module Undertaker
         Undertaker::InstanceMethodWrapper.new(klass).wrap_methods!
       end
 
-      def enable_for_tracked_classes!
+      def enable_for_cached_classes!
         return if @enabled
         return unless allowed?
         @enabled = true
-        tracked_classes.each do |class_name|
+        cached_classes.each do |class_name|
           klass = Object.const_get(class_name) rescue nil
           enable(klass) if klass
         end
       end
 
       def allowed?
-        return true unless Undertaker.config.redis
-        key = "#{self.name}/lock"
-        (Undertaker.config.redis.incr(key) == 1).tap do |is_first|
-          Undertaker.config.redis.expire(key, 60) if is_first
+        if Undertaker.config.allowed.respond_to?(:call)
+          Undertaker.config.allowed.call
+        else
+          Undertaker.config.allowed
         end
       end
 
-      def tracked_classes
-        Undertaker.config.backend.get(tracked_classes_key)
+      def cached_classes
+        Undertaker.config.storage.get(tracked_classes_key)
       end
 
       private
@@ -51,8 +49,10 @@ module Undertaker
         ObjectSpace.each_object(parent_class.singleton_class).select { |klass| klass < parent_class }
       end
 
-      def track_class(klass)
-        Undertaker.config.backend.add(tracked_classes_key, klass.name)
+      def cache_methods_for(klass)
+        Undertaker.config.storage.add(tracked_classes_key, klass.name)
+        Undertaker::ClassMethodWrapper.new(klass).refresh_cache
+        Undertaker::InstanceMethodWrapper.new(klass).refresh_cache
       end
 
       def tracked_classes_key

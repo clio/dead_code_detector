@@ -24,18 +24,16 @@ module Undertaker
 
     def wrap_method(original_method)
       original_class = klass
-      original_class.class_eval do
-        define_method(original_method.name) do |*args, &block|
-          begin
-            Undertaker::InstanceMethodWrapper.unwrap_method(original_class, original_method)
-          rescue StandardError => e
-            if Undertaker.config.error_handler
-              Undertaker.config.error_handler.call(e)
-            end
+      klass.send(:define_method, original_method.name) do |*args, &block|
+        begin
+          Undertaker::InstanceMethodWrapper.unwrap_method(original_class, original_method)
+        rescue StandardError => e
+          if Undertaker.config.error_handler
+            Undertaker.config.error_handler.call(e)
           end
-          method_bound_to_caller = original_method.bind(self)
-          method_bound_to_caller.call(*args, &block)
         end
+        method_bound_to_caller = original_method.bind(self)
+        method_bound_to_caller.call(*args, &block)
       end
     end
 

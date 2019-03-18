@@ -24,7 +24,7 @@ RSpec.describe Undertaker::InstanceMethodWrapper do
   end
 
   before do
-    Undertaker::Initializer.setup_for(anonymous_class)
+    Undertaker::Initializer.refresh_cache_for(anonymous_class)
   end
 
   describe "#wrap_methods!" do
@@ -43,13 +43,13 @@ RSpec.describe Undertaker::InstanceMethodWrapper do
 
   context ".refresh_cache" do
     before do
-      Undertaker.config.backend.clear(described_class.record_key(anonymous_class.name))
+      Undertaker.config.storage.clear(described_class.record_key(anonymous_class.name))
     end
 
     it "sets up the cache with the full list of methods" do
       expect do
         described_class.new(anonymous_class).refresh_cache
-      end.to change{ Undertaker.config.backend.get(described_class.record_key(anonymous_class.name)) }
+      end.to change{ Undertaker.config.storage.get(described_class.record_key(anonymous_class.name)) }
         .from(Set.new)
         .to(Set.new(["bar", "counter", "counter="]))
     end
@@ -87,14 +87,14 @@ RSpec.describe Undertaker::InstanceMethodWrapper do
         it "does not include the module method" do
           expect do
             described_class.new(second_anonymous_class).refresh_cache
-          end.to_not change{  Undertaker.config.backend.get(described_class.record_key(second_anonymous_class.name)).include?("bar") }
+          end.to_not change{  Undertaker.config.storage.get(described_class.record_key(second_anonymous_class.name)).include?("bar") }
         end
       end
 
       it "includes the module method" do
         expect do
           described_class.new(anonymous_class).refresh_cache
-        end.to change{  Undertaker.config.backend.get(described_class.record_key(anonymous_class.name)).include?("bar") }
+        end.to change{  Undertaker.config.storage.get(described_class.record_key(anonymous_class.name)).include?("bar") }
           .from(false)
           .to(true)
 
@@ -144,7 +144,7 @@ RSpec.describe Undertaker::InstanceMethodWrapper do
       end
 
       before do
-        Undertaker::Initializer.setup_for(second_anonymous_class)
+        Undertaker::Initializer.refresh_cache_for(second_anonymous_class)
         wrapper = described_class.new(second_anonymous_class)
         wrapper.wrap_methods!
       end

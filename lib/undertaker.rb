@@ -17,9 +17,9 @@ module Undertaker
   end
 
   def self.enable(&block)
-    Undertaker::Initializer.enable_for_tracked_classes!
+    Undertaker::Initializer.enable_for_cached_classes!
     block.call
-    config.backend.flush
+    config.storage.flush
   end
 
 end

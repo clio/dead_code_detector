@@ -17,6 +17,7 @@ module Undertaker
         values = Array(values)
         return if values.empty?
         Undertaker.config.redis.sadd(key, values)
+        Undertaker.config.redis.expire(key, Undertaker.config.cache_expiry)
       end
 
       def get(key)
