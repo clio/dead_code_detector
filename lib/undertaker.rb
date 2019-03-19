@@ -18,9 +18,12 @@ module Undertaker
   end
 
   def self.enable(&block)
-    Undertaker::Initializer.enable_for_cached_classes!
-    block.call
-    config.storage.flush
+    begin
+      Undertaker::Initializer.enable_for_cached_classes!
+      block.call
+    ensure
+      config.storage.flush
+    end
   end
 
 end
