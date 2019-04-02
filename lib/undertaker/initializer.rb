@@ -17,6 +17,17 @@ module Undertaker
         end
       end
 
+      def clear_cache
+        cached_classes.each do |class_name|
+          klass = Object.const_get(class_name) rescue nil
+          if klass
+            Undertaker::ClassMethodWrapper.new(klass).clear_cache
+            Undertaker::InstanceMethodWrapper.new(klass).clear_cache
+          end
+        end
+        Undertaker.config.storage.clear(tracked_classes_key)
+      end
+
       def enable(klass)
         Undertaker::ClassMethodWrapper.new(klass).wrap_methods!
         Undertaker::InstanceMethodWrapper.new(klass).wrap_methods!

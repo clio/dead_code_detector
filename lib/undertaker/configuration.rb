@@ -1,7 +1,7 @@
 module Undertaker
   class Configuration
 
-    attr_accessor :redis, :classes_to_monitor, :error_handler, :allowed, :cache_expiry
+    attr_accessor :redis, :classes_to_monitor, :error_handler, :allowed, :cache_expiry, :ignore_paths
 
     STORAGE_BACKENDS = {
       memory: Storage::MemoryBackend,

@@ -46,6 +46,48 @@ RSpec.describe Undertaker::InstanceMethodWrapper do
       Undertaker.config.storage.clear(described_class.record_key(anonymous_class.name))
     end
 
+
+    context "when there is a ignore_paths set" do
+      context "and it doesn't match the source location" do
+        around(:each) do |example|
+          begin
+            old_path = Undertaker.config.ignore_paths
+            Undertaker.config.ignore_paths = /foo/
+            example.run
+          ensure
+            Undertaker.config.ignore_paths = old_path
+          end
+        end
+
+        it "includes the methods" do
+          expect do
+            described_class.new(anonymous_class).refresh_cache
+          end.to change{ Undertaker.config.storage.get(described_class.record_key(anonymous_class.name)) }
+            .from(Set.new)
+            .to(Set.new(["bar", "counter", "counter="]))
+        end
+      end
+
+      context "and it matches the source location" do
+        around(:each) do |example|
+          begin
+            old_path = Undertaker.config.ignore_paths
+            Undertaker.config.ignore_paths = /spec/
+            example.run
+          ensure
+            Undertaker.config.ignore_paths = old_path
+          end
+        end
+
+        it "doesn't includes the methods" do
+          expect do
+            described_class.new(anonymous_class).refresh_cache
+          end.to_not change{ Undertaker.config.storage.get(described_class.record_key(anonymous_class.name)) }
+        end
+      end
+
+    end
+
     it "sets up the cache with the full list of methods" do
       expect do
         described_class.new(anonymous_class).refresh_cache

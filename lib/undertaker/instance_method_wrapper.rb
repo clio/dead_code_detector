@@ -38,7 +38,15 @@ module Undertaker
     end
 
     def default_methods
-      klass.instance_methods.map(&:to_s).select{|method_name| owned_method?(method_name) }
+      klass.instance_methods.map(&:to_s).select do |method_name|
+        owned_method?(method_name) && target_directory?(method_name)
+      end
+    end
+
+    def target_directory?(method_name)
+      return true if Undertaker.config.ignore_paths.nil?
+      source_location = klass.instance_method(method_name).source_location&.first
+      source_location !~ Undertaker.config.ignore_paths
     end
 
     def owned_method?(method_name)

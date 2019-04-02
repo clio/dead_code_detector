@@ -23,7 +23,12 @@ module Undertaker
       end
     end
 
+    def clear_cache
+      Undertaker.config.storage.clear(self.class.record_key(klass.name))
+    end
+
     def refresh_cache
+      clear_cache
       Undertaker.config.storage.add(self.class.record_key(klass.name), default_methods)
     end
 

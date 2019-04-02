@@ -12,7 +12,7 @@ module Undertaker
       end
 
       def clear(key)
-        @mapping.clear
+        @mapping.delete(key)
       end
 
       def add(key, values)
