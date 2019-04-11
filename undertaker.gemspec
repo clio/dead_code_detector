@@ -9,8 +9,8 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Kyle d'Oliveira"]
   spec.email         = ["kyle.doliveira@clio.com"]
 
-  spec.summary       = %q{Write a short summary, because RubyGems requires one.}
-  spec.description   = %q{Write a longer description or delete this line.}
+  spec.summary       = %q{Help find unused code in production.}
+  spec.description   = %q{This monitors methods being called and can be used to produce a report of all methods that have not been called.}
   spec.homepage      = "https://github.com/clio/undertaker"
   spec.license       = "MIT"
 
