@@ -1,4 +1,4 @@
-module Undertaker
+module DeadCodeDetector
   class Storage
 
     class MemoryBackend

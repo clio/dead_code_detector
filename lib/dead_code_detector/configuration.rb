@@ -1,4 +1,4 @@
-module Undertaker
+module DeadCodeDetector
   class Configuration
 
     attr_accessor :redis, :classes_to_monitor, :error_handler, :allowed, :cache_expiry, :ignore_paths

@@ -1,17 +1,17 @@
 
 lib = File.expand_path("../lib", __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require "undertaker/version"
+require "dead_code_detector/version"
 
 Gem::Specification.new do |spec|
-  spec.name          = "undertaker"
-  spec.version       = Undertaker::VERSION
+  spec.name          = "dead_code_detector"
+  spec.version       = DeadCodeDetector::VERSION
   spec.authors       = ["Kyle d'Oliveira"]
   spec.email         = ["kyle.doliveira@clio.com"]
 
   spec.summary       = %q{Help find unused code in production.}
   spec.description   = %q{This monitors methods being called and can be used to produce a report of all methods that have not been called.}
-  spec.homepage      = "https://github.com/clio/undertaker"
+  spec.homepage      = "https://github.com/clio/dead_code_detector"
   spec.license       = "MIT"
 
   # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'
@@ -20,7 +20,7 @@ Gem::Specification.new do |spec|
     spec.metadata["allowed_push_host"] = "TODO: Set to 'http://mygemserver.com'"
 
     spec.metadata["homepage_uri"] = spec.homepage
-    spec.metadata["source_code_uri"] = "https://github.com/clio/undertaker"
+    spec.metadata["source_code_uri"] = "https://github.com/clio/dead_code_detector"
     # spec.metadata["changelog_uri"] = "TODO: Put your gem's CHANGELOG.md URL here."
   else
     raise "RubyGems 2.0 or newer is required to protect against " \

@@ -1,10 +1,10 @@
-module Undertaker
+module DeadCodeDetector
   class Initializer
 
     class << self
 
       def refresh_caches
-        Undertaker.config.classes_to_monitor.each do |klass|
+        DeadCodeDetector.config.classes_to_monitor.each do |klass|
           refresh_cache_for(klass)
         end
       end
@@ -21,16 +21,16 @@ module Undertaker
         cached_classes.each do |class_name|
           klass = Object.const_get(class_name) rescue nil
           if klass
-            Undertaker::ClassMethodWrapper.new(klass).clear_cache
-            Undertaker::InstanceMethodWrapper.new(klass).clear_cache
+            DeadCodeDetector::ClassMethodWrapper.new(klass).clear_cache
+            DeadCodeDetector::InstanceMethodWrapper.new(klass).clear_cache
           end
         end
-        Undertaker.config.storage.clear(tracked_classes_key)
+        DeadCodeDetector.config.storage.clear(tracked_classes_key)
       end
 
       def enable(klass)
-        Undertaker::ClassMethodWrapper.new(klass).wrap_methods!
-        Undertaker::InstanceMethodWrapper.new(klass).wrap_methods!
+        DeadCodeDetector::ClassMethodWrapper.new(klass).wrap_methods!
+        DeadCodeDetector::InstanceMethodWrapper.new(klass).wrap_methods!
       end
 
       def enable_for_cached_classes!
@@ -44,15 +44,15 @@ module Undertaker
       end
 
       def allowed?
-        if Undertaker.config.allowed.respond_to?(:call)
-          Undertaker.config.allowed.call
+        if DeadCodeDetector.config.allowed.respond_to?(:call)
+          DeadCodeDetector.config.allowed.call
         else
-          Undertaker.config.allowed
+          DeadCodeDetector.config.allowed
         end
       end
 
       def cached_classes
-        Undertaker.config.storage.get(tracked_classes_key)
+        DeadCodeDetector.config.storage.get(tracked_classes_key)
       end
 
       private
@@ -61,13 +61,13 @@ module Undertaker
       end
 
       def cache_methods_for(klass)
-        Undertaker.config.storage.add(tracked_classes_key, klass.name)
-        Undertaker::ClassMethodWrapper.new(klass).refresh_cache
-        Undertaker::InstanceMethodWrapper.new(klass).refresh_cache
+        DeadCodeDetector.config.storage.add(tracked_classes_key, klass.name)
+        DeadCodeDetector::ClassMethodWrapper.new(klass).refresh_cache
+        DeadCodeDetector::InstanceMethodWrapper.new(klass).refresh_cache
       end
 
       def tracked_classes_key
-        "undertaker/method_wrapper/tracked_classes"
+        "dead_code_detector/method_wrapper/tracked_classes"
       end
     end
 

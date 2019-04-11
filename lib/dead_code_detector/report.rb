@@ -1,4 +1,4 @@
-module Undertaker
+module DeadCodeDetector
   class Report
 
     class << self
@@ -22,11 +22,11 @@ module Undertaker
 
       private
       def unused_class_methods_for(class_name)
-        Undertaker.config.storage.get(Undertaker::ClassMethodWrapper.record_key(class_name))
+        DeadCodeDetector.config.storage.get(DeadCodeDetector::ClassMethodWrapper.record_key(class_name))
       end
 
       def unused_instance_methods_for(class_name)
-        Undertaker.config.storage.get(Undertaker::InstanceMethodWrapper.record_key(class_name))
+        DeadCodeDetector.config.storage.get(DeadCodeDetector::InstanceMethodWrapper.record_key(class_name))
       end
     end
 

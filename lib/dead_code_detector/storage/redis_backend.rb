@@ -1,4 +1,4 @@
-module Undertaker
+module DeadCodeDetector
   class Storage
 
     class RedisBackend
@@ -10,18 +10,18 @@ module Undertaker
       end
 
       def clear(key)
-        Undertaker.config.redis.del(key)
+        DeadCodeDetector.config.redis.del(key)
       end
 
       def add(key, values)
         values = Array(values)
         return if values.empty?
-        Undertaker.config.redis.sadd(key, values)
-        Undertaker.config.redis.expire(key, Undertaker.config.cache_expiry)
+        DeadCodeDetector.config.redis.sadd(key, values)
+        DeadCodeDetector.config.redis.expire(key, DeadCodeDetector.config.cache_expiry)
       end
 
       def get(key)
-        members = Undertaker.config.redis.smembers(key)
+        members = DeadCodeDetector.config.redis.smembers(key)
         members = Set.new(members) if members.is_a?(Array)
         if @pending_deletions.key?(key)
           members - @pending_deletions[key]
@@ -37,7 +37,7 @@ module Undertaker
 
       def flush
         @pending_deletions.each do |key, values|
-          Undertaker.config.redis.srem(key, values.to_a)
+          DeadCodeDetector.config.redis.srem(key, values.to_a)
         end
         @pending_deletions.clear
       end

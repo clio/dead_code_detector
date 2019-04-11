@@ -1,4 +1,4 @@
-module Undertaker
+module DeadCodeDetector
   class InstanceMethodWrapper < BaseMethodWrapper
 
     class << self
@@ -12,7 +12,7 @@ module Undertaker
       end
 
       def record_key(class_name)
-        "undertaker/record_keeper/#{class_name}/instance_methods"
+        "dead_code_detector/record_keeper/#{class_name}/instance_methods"
       end
     end
 
@@ -26,10 +26,10 @@ module Undertaker
       original_class = klass
       klass.send(:define_method, original_method.name) do |*args, &block|
         begin
-          Undertaker::InstanceMethodWrapper.unwrap_method(original_class, original_method)
+          DeadCodeDetector::InstanceMethodWrapper.unwrap_method(original_class, original_method)
         rescue StandardError => e
-          if Undertaker.config.error_handler
-            Undertaker.config.error_handler.call(e)
+          if DeadCodeDetector.config.error_handler
+            DeadCodeDetector.config.error_handler.call(e)
           end
         end
         method_bound_to_caller = original_method.bind(self)
@@ -44,9 +44,9 @@ module Undertaker
     end
 
     def target_directory?(method_name)
-      return true if Undertaker.config.ignore_paths.nil?
+      return true if DeadCodeDetector.config.ignore_paths.nil?
       source_location = klass.instance_method(method_name).source_location&.first
-      source_location !~ Undertaker.config.ignore_paths
+      source_location !~ DeadCodeDetector.config.ignore_paths
     end
 
     def owned_method?(method_name)

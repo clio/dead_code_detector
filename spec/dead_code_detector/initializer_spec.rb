@@ -1,6 +1,6 @@
 require "spec_helper"
 
-RSpec.describe Undertaker::Initializer do
+RSpec.describe DeadCodeDetector::Initializer do
   let(:anonymous_class) do
     Class.new do
       def self.name
@@ -12,7 +12,7 @@ RSpec.describe Undertaker::Initializer do
   describe ".allowed?" do
     before do
       count = 0
-      allow(Undertaker.config).to receive(:allowed).and_return(->{
+      allow(DeadCodeDetector.config).to receive(:allowed).and_return(->{
         count += 1
         count == 1
       })
@@ -27,7 +27,7 @@ RSpec.describe Undertaker::Initializer do
     it "marks the class as being tracked" do
       expect do
         described_class.refresh_cache_for(anonymous_class)
-      end.to change{ Undertaker::Initializer.cached_classes.include?(anonymous_class.name) }
+      end.to change{ DeadCodeDetector::Initializer.cached_classes.include?(anonymous_class.name) }
         .from(false)
         .to(true)
     end
@@ -41,14 +41,14 @@ RSpec.describe Undertaker::Initializer do
 
     it "wraps the class methods" do
       wrapper = double
-      expect(Undertaker::ClassMethodWrapper).to receive(:new).with(anonymous_class).and_return(wrapper)
+      expect(DeadCodeDetector::ClassMethodWrapper).to receive(:new).with(anonymous_class).and_return(wrapper)
       expect(wrapper).to receive(:wrap_methods!)
       described_class.enable(anonymous_class)
     end
 
     it "wraps the instance methods" do
       wrapper = double
-      expect(Undertaker::InstanceMethodWrapper).to receive(:new).with(anonymous_class).and_return(wrapper)
+      expect(DeadCodeDetector::InstanceMethodWrapper).to receive(:new).with(anonymous_class).and_return(wrapper)
       expect(wrapper).to receive(:wrap_methods!)
       described_class.enable(anonymous_class)
     end

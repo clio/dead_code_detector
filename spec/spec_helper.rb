@@ -1,7 +1,7 @@
 require "bundler/setup"
-require "undertaker"
+require "dead_code_detector"
 
-Undertaker.configure do |config|
+DeadCodeDetector.configure do |config|
   config.storage = :memory
 end
 

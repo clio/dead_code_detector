@@ -1,4 +1,4 @@
-module Undertaker
+module DeadCodeDetector
   class BaseMethodWrapper
 
     attr_reader :klass
@@ -9,7 +9,7 @@ module Undertaker
 
     class << self
       def track_method(klass, method_name)
-        Undertaker.config.storage.delete(record_key(klass.name), method_name)
+        DeadCodeDetector.config.storage.delete(record_key(klass.name), method_name)
       end
 
       def unwrap_method(klass, original_method)
@@ -24,12 +24,12 @@ module Undertaker
     end
 
     def clear_cache
-      Undertaker.config.storage.clear(self.class.record_key(klass.name))
+      DeadCodeDetector.config.storage.clear(self.class.record_key(klass.name))
     end
 
     def refresh_cache
       clear_cache
-      Undertaker.config.storage.add(self.class.record_key(klass.name), default_methods)
+      DeadCodeDetector.config.storage.add(self.class.record_key(klass.name), default_methods)
     end
 
     private
@@ -52,7 +52,7 @@ module Undertaker
 
     # Due to caching, new methods won't show up automatically in this call
     def potentially_unused_methods
-      stored_methods = Undertaker.config.storage.get(self.class.record_key(klass.name))
+      stored_methods = DeadCodeDetector.config.storage.get(self.class.record_key(klass.name))
 
       stored_methods & default_methods.map(&:to_s)
     end

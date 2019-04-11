@@ -1,6 +1,6 @@
 require "spec_helper"
 
-RSpec.describe Undertaker::InstanceMethodWrapper do
+RSpec.describe DeadCodeDetector::InstanceMethodWrapper do
 
   let(:anonymous_class) do
     Class.new do
@@ -24,7 +24,7 @@ RSpec.describe Undertaker::InstanceMethodWrapper do
   end
 
   before do
-    Undertaker::Initializer.refresh_cache_for(anonymous_class)
+    DeadCodeDetector::Initializer.refresh_cache_for(anonymous_class)
   end
 
   describe "#wrap_methods!" do
@@ -43,7 +43,7 @@ RSpec.describe Undertaker::InstanceMethodWrapper do
 
   context ".refresh_cache" do
     before do
-      Undertaker.config.storage.clear(described_class.record_key(anonymous_class.name))
+      DeadCodeDetector.config.storage.clear(described_class.record_key(anonymous_class.name))
     end
 
 
@@ -51,18 +51,18 @@ RSpec.describe Undertaker::InstanceMethodWrapper do
       context "and it doesn't match the source location" do
         around(:each) do |example|
           begin
-            old_path = Undertaker.config.ignore_paths
-            Undertaker.config.ignore_paths = /foo/
+            old_path = DeadCodeDetector.config.ignore_paths
+            DeadCodeDetector.config.ignore_paths = /foo/
             example.run
           ensure
-            Undertaker.config.ignore_paths = old_path
+            DeadCodeDetector.config.ignore_paths = old_path
           end
         end
 
         it "includes the methods" do
           expect do
             described_class.new(anonymous_class).refresh_cache
-          end.to change{ Undertaker.config.storage.get(described_class.record_key(anonymous_class.name)) }
+          end.to change{ DeadCodeDetector.config.storage.get(described_class.record_key(anonymous_class.name)) }
             .from(Set.new)
             .to(Set.new(["bar", "counter", "counter="]))
         end
@@ -71,18 +71,18 @@ RSpec.describe Undertaker::InstanceMethodWrapper do
       context "and it matches the source location" do
         around(:each) do |example|
           begin
-            old_path = Undertaker.config.ignore_paths
-            Undertaker.config.ignore_paths = /spec/
+            old_path = DeadCodeDetector.config.ignore_paths
+            DeadCodeDetector.config.ignore_paths = /spec/
             example.run
           ensure
-            Undertaker.config.ignore_paths = old_path
+            DeadCodeDetector.config.ignore_paths = old_path
           end
         end
 
         it "doesn't includes the methods" do
           expect do
             described_class.new(anonymous_class).refresh_cache
-          end.to_not change{ Undertaker.config.storage.get(described_class.record_key(anonymous_class.name)) }
+          end.to_not change{ DeadCodeDetector.config.storage.get(described_class.record_key(anonymous_class.name)) }
         end
       end
 
@@ -91,7 +91,7 @@ RSpec.describe Undertaker::InstanceMethodWrapper do
     it "sets up the cache with the full list of methods" do
       expect do
         described_class.new(anonymous_class).refresh_cache
-      end.to change{ Undertaker.config.storage.get(described_class.record_key(anonymous_class.name)) }
+      end.to change{ DeadCodeDetector.config.storage.get(described_class.record_key(anonymous_class.name)) }
         .from(Set.new)
         .to(Set.new(["bar", "counter", "counter="]))
     end
@@ -129,14 +129,14 @@ RSpec.describe Undertaker::InstanceMethodWrapper do
         it "does not include the module method" do
           expect do
             described_class.new(second_anonymous_class).refresh_cache
-          end.to_not change{  Undertaker.config.storage.get(described_class.record_key(second_anonymous_class.name)).include?("bar") }
+          end.to_not change{  DeadCodeDetector.config.storage.get(described_class.record_key(second_anonymous_class.name)).include?("bar") }
         end
       end
 
       it "includes the module method" do
         expect do
           described_class.new(anonymous_class).refresh_cache
-        end.to change{  Undertaker.config.storage.get(described_class.record_key(anonymous_class.name)).include?("bar") }
+        end.to change{  DeadCodeDetector.config.storage.get(described_class.record_key(anonymous_class.name)).include?("bar") }
           .from(false)
           .to(true)
 
@@ -153,7 +153,7 @@ RSpec.describe Undertaker::InstanceMethodWrapper do
 
       expect do
         anonymous_class.new.bar
-      end.to change { Undertaker::Report.unused_methods_for(anonymous_class.name).include?("#{anonymous_class.name}#bar") }
+      end.to change { DeadCodeDetector::Report.unused_methods_for(anonymous_class.name).include?("#{anonymous_class.name}#bar") }
         .from(true)
         .to(false)
     end
@@ -186,7 +186,7 @@ RSpec.describe Undertaker::InstanceMethodWrapper do
       end
 
       before do
-        Undertaker::Initializer.refresh_cache_for(second_anonymous_class)
+        DeadCodeDetector::Initializer.refresh_cache_for(second_anonymous_class)
         wrapper = described_class.new(second_anonymous_class)
         wrapper.wrap_methods!
       end
