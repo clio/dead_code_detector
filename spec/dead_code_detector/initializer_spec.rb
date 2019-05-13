@@ -32,6 +32,14 @@ RSpec.describe DeadCodeDetector::Initializer do
         .to(true)
     end
 
+    context "when the class has no tracked methods" do
+      let(:anonymous_class) { Class.new }
+      it "doesn't include it in the cached classes" do
+        expect do
+          described_class.refresh_cache_for(anonymous_class)
+        end.to_not change{ DeadCodeDetector::Initializer.cached_classes }
+      end
+    end
   end
 
   describe ".enable" do

@@ -23,6 +23,10 @@ module DeadCodeDetector
       end
     end
 
+    def number_of_tracked_methods
+      default_methods.count
+    end
+
     def clear_cache
       DeadCodeDetector.config.storage.clear(self.class.record_key(klass.name))
     end

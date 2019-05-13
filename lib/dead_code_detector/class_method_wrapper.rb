@@ -44,7 +44,7 @@ module DeadCodeDetector
     end
 
     def default_methods
-      klass.methods.map(&:to_s).select do |method_name|
+      @default_methods ||= klass.methods.map(&:to_s).select do |method_name|
         owned_method?(method_name) && target_directory?(method_name)
       end
     end
