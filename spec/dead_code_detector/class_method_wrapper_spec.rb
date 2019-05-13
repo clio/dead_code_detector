@@ -59,6 +59,16 @@ RSpec.describe DeadCodeDetector::ClassMethodWrapper do
           end
         end
 
+        context "and the method doesn't have a source location" do
+          it "excludes it" do
+            allow_any_instance_of(Method).to receive(:source_location).and_return(nil)
+
+            expect do
+              described_class.new(anonymous_class).refresh_cache
+            end.to_not change{ DeadCodeDetector.config.storage.get(described_class.record_key(anonymous_class.name)) }
+
+          end
+        end
         it "includes the methods" do
           expect do
             described_class.new(anonymous_class).refresh_cache
