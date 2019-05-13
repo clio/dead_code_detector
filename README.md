@@ -84,6 +84,7 @@ DeadCodeDetector.configure do |config|
 
   # DeadCodeDetector will filter out methods whose source_location matches this regular expression.
   # This is useful for filtering out methods from gems (such as the methods from ActiveRecord::Base)
+  # Specifying a value here will cause DeadCodeDetector to ignore methods defined in C
   # config.ignore_paths = /\/vendor\//
 
   # A list of classes that DeadCodeDetector will monitor method usage on.

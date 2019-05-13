@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    dead_code_detector (0.0.7.alpha)
+    dead_code_detector (0.0.9)
 
 GEM
   remote: https://rubygems.org/
@@ -29,9 +29,9 @@ PLATFORMS
 DEPENDENCIES
   bundler (~> 1.17)
   byebug
+  dead_code_detector!
   rake (~> 10.0)
   rspec (~> 3.0)
-  dead_code_detector!
 
 BUNDLED WITH
    1.17.3
