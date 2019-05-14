@@ -61,9 +61,11 @@ module DeadCodeDetector
       end
 
       def cache_methods_for(klass)
-        DeadCodeDetector.config.storage.add(tracked_classes_key, klass.name)
-        DeadCodeDetector::ClassMethodWrapper.new(klass).refresh_cache
-        DeadCodeDetector::InstanceMethodWrapper.new(klass).refresh_cache
+        class_wrapper = DeadCodeDetector::ClassMethodWrapper.new(klass).tap(&:refresh_cache)
+        instance_wrapper = DeadCodeDetector::InstanceMethodWrapper.new(klass).tap(&:refresh_cache)
+        if class_wrapper.number_of_tracked_methods + instance_wrapper.number_of_tracked_methods > 0
+          DeadCodeDetector.config.storage.add(tracked_classes_key, klass.name)
+        end
       end
 
       def tracked_classes_key
