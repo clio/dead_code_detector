@@ -46,7 +46,8 @@ module DeadCodeDetector
     def target_directory?(method_name)
       return true if DeadCodeDetector.config.ignore_paths.nil?
       source_location = klass.instance_method(method_name).source_location&.first
-      return false if source_location.nil?
+      return false if source_location.nil? || !source_location.start_with?("/")
+
       source_location !~ DeadCodeDetector.config.ignore_paths
     end
 
