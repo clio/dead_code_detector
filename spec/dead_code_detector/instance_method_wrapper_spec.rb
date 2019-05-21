@@ -41,11 +41,11 @@ RSpec.describe DeadCodeDetector::InstanceMethodWrapper do
     end
   end
 
-  context ".refresh_cache" do
+  context ".populate_cache" do
     before do
-      DeadCodeDetector.config.storage.clear(described_class.record_key(anonymous_class.name))
+      DeadCodeDetector::MethodCacher.clear_cache
+      DeadCodeDetector::MethodCacher.add_class(anonymous_class.name)
     end
-
 
     context "when there is a ignore_paths set" do
       context "and it doesn't match the source location" do
@@ -62,19 +62,20 @@ RSpec.describe DeadCodeDetector::InstanceMethodWrapper do
         context "and the method doesn't have a source location" do
           it "excludes it" do
             allow_any_instance_of(UnboundMethod).to receive(:source_location).and_return(nil)
-
+            wrapper = described_class.new(anonymous_class)
             expect do
-              described_class.new(anonymous_class).refresh_cache
-            end.to_not change{ DeadCodeDetector.config.storage.get(described_class.record_key(anonymous_class.name)) }
+              wrapper.populate_cache
+            end.to_not change{ wrapper.send(:potentially_unused_methods) }
           end
         end
 
         it "includes the methods" do
+          wrapper = described_class.new(anonymous_class)
           expect do
-            described_class.new(anonymous_class).refresh_cache
-          end.to change{ DeadCodeDetector.config.storage.get(described_class.record_key(anonymous_class.name)) }
-            .from(Set.new)
-            .to(Set.new(["bar", "counter", "counter="]))
+            wrapper.populate_cache
+          end.to change{ wrapper.send(:potentially_unused_methods).sort }
+            .from([])
+            .to(["bar", "counter", "counter="])
         end
       end
 
@@ -90,20 +91,22 @@ RSpec.describe DeadCodeDetector::InstanceMethodWrapper do
         end
 
         it "doesn't includes the methods" do
+          wrapper = described_class.new(anonymous_class)
           expect do
-            described_class.new(anonymous_class).refresh_cache
-          end.to_not change{ DeadCodeDetector.config.storage.get(described_class.record_key(anonymous_class.name)) }
+            wrapper.populate_cache
+          end.to_not change{ wrapper.send(:potentially_unused_methods) }
         end
       end
 
     end
 
     it "sets up the cache with the full list of methods" do
+      wrapper = described_class.new(anonymous_class)
       expect do
-        described_class.new(anonymous_class).refresh_cache
-      end.to change{ DeadCodeDetector.config.storage.get(described_class.record_key(anonymous_class.name)) }
-        .from(Set.new)
-        .to(Set.new(["bar", "counter", "counter="]))
+        wrapper.populate_cache
+      end.to change{ wrapper.send(:potentially_unused_methods).sort }
+        .from([])
+        .to(["bar", "counter", "counter="])
     end
 
     context "when the class contains methods from a module" do
@@ -137,16 +140,19 @@ RSpec.describe DeadCodeDetector::InstanceMethodWrapper do
         end
 
         it "does not include the module method" do
+          DeadCodeDetector::MethodCacher.add_class(second_anonymous_class.name)
+          wrapper = described_class.new(second_anonymous_class)
           expect do
-            described_class.new(second_anonymous_class).refresh_cache
-          end.to_not change{  DeadCodeDetector.config.storage.get(described_class.record_key(second_anonymous_class.name)).include?("bar") }
+            wrapper.populate_cache
+          end.to_not change{  wrapper.send(:potentially_unused_methods).include?("bar") }
         end
       end
 
       it "includes the module method" do
+        wrapper = described_class.new(anonymous_class)
         expect do
-          described_class.new(anonymous_class).refresh_cache
-        end.to change{  DeadCodeDetector.config.storage.get(described_class.record_key(anonymous_class.name)).include?("bar") }
+          wrapper.populate_cache
+        end.to change{ wrapper.send(:potentially_unused_methods).include?("bar") }
           .from(false)
           .to(true)
 

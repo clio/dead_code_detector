@@ -2,6 +2,10 @@ module DeadCodeDetector
   class InstanceMethodWrapper < BaseMethodWrapper
 
     class << self
+      def delimiter
+        "#".freeze
+      end
+
       def unwrap_method(klass, original_method)
         if original_method.owner == klass
           klass.send(:define_method, original_method.name, original_method)
@@ -9,10 +13,6 @@ module DeadCodeDetector
           klass.send(:remove_method, original_method.name)
         end
         track_method(klass, original_method.name)
-      end
-
-      def record_key(class_name)
-        "dead_code_detector/record_keeper/#{class_name}/instance_methods"
       end
     end
 

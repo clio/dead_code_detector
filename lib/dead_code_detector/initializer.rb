@@ -18,26 +18,19 @@ module DeadCodeDetector
       end
 
       def clear_cache
-        cached_classes.each do |class_name|
-          klass = Object.const_get(class_name) rescue nil
-          if klass
-            DeadCodeDetector::ClassMethodWrapper.new(klass).clear_cache
-            DeadCodeDetector::InstanceMethodWrapper.new(klass).clear_cache
-          end
-        end
-        DeadCodeDetector.config.storage.clear(tracked_classes_key)
+        MethodCacher.clear_cache
       end
 
       def enable(klass)
-        DeadCodeDetector::ClassMethodWrapper.new(klass).wrap_methods!
-        DeadCodeDetector::InstanceMethodWrapper.new(klass).wrap_methods!
+        ClassMethodWrapper.new(klass).wrap_methods!
+        InstanceMethodWrapper.new(klass).wrap_methods!
       end
 
       def enable_for_cached_classes!
         return if @enabled
         return unless allowed?
         @enabled = true
-        cached_classes.each do |class_name|
+        MethodCacher.cached_classes.each do |class_name|
           klass = Object.const_get(class_name) rescue nil
           enable(klass) if klass
         end
@@ -51,25 +44,19 @@ module DeadCodeDetector
         end
       end
 
-      def cached_classes
-        DeadCodeDetector.config.storage.get(tracked_classes_key)
-      end
-
       private
       def descendants_of(parent_class)
         ObjectSpace.each_object(parent_class.singleton_class).select { |klass| klass < parent_class }
       end
 
       def cache_methods_for(klass)
-        class_wrapper = DeadCodeDetector::ClassMethodWrapper.new(klass).tap(&:refresh_cache)
-        instance_wrapper = DeadCodeDetector::InstanceMethodWrapper.new(klass).tap(&:refresh_cache)
+        class_wrapper = DeadCodeDetector::ClassMethodWrapper.new(klass)
+        instance_wrapper = DeadCodeDetector::InstanceMethodWrapper.new(klass)
         if class_wrapper.number_of_tracked_methods + instance_wrapper.number_of_tracked_methods > 0
-          DeadCodeDetector.config.storage.add(tracked_classes_key, klass.name)
+          MethodCacher.add_class(klass.name)
         end
-      end
-
-      def tracked_classes_key
-        "dead_code_detector/method_wrapper/tracked_classes"
+        class_wrapper.populate_cache
+        instance_wrapper.populate_cache
       end
     end
 

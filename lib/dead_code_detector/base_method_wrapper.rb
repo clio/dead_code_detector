@@ -8,8 +8,12 @@ module DeadCodeDetector
     end
 
     class << self
+      def delimiter
+        raise NotImeplementedError
+      end
+
       def track_method(klass, method_name)
-        DeadCodeDetector.config.storage.delete(record_key(klass.name), method_name)
+        MethodCacher.track_method(klass.name, method_name, delimiter: delimiter)
       end
 
       def unwrap_method(klass, original_method)
@@ -27,13 +31,13 @@ module DeadCodeDetector
       default_methods.count
     end
 
-    def clear_cache
-      DeadCodeDetector.config.storage.clear(self.class.record_key(klass.name))
-    end
-
-    def refresh_cache
-      clear_cache
-      DeadCodeDetector.config.storage.add(self.class.record_key(klass.name), default_methods)
+    def populate_cache
+      return if number_of_tracked_methods.zero?
+      MethodCacher.populate_method_cache(
+        klass.name,
+        default_methods,
+        delimiter: self.class.delimiter
+      )
     end
 
     private
@@ -56,8 +60,10 @@ module DeadCodeDetector
 
     # Due to caching, new methods won't show up automatically in this call
     def potentially_unused_methods
-      stored_methods = DeadCodeDetector.config.storage.get(self.class.record_key(klass.name))
-
+      stored_methods = MethodCacher.potentially_unused_methods(
+        klass.name,
+        delimiter: self.class.delimiter
+      )
       stored_methods & default_methods.map(&:to_s)
     end
 

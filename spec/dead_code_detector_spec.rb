@@ -22,9 +22,15 @@ RSpec.describe DeadCodeDetector do
 
     it "doesn't record method calls outside of the block" do
       DeadCodeDetector.enable {}
-      DeadCodeDetector::TestClass.foo
+      expect do
+        DeadCodeDetector::TestClass.foo
+      end.to_not(change do
+                   DeadCodeDetector.config.storage.get(
+                     DeadCodeDetector::MethodCacher.send(:tracked_methods_key)
+                   ).length
+                 end)
 
-      expect(DeadCodeDetector.config.storage.pending_deletions.values).to include(Set.new(["foo"]))
+      expect(DeadCodeDetector.config.storage.pending_deletions.values.length).to eql 1
     end
   end
 end

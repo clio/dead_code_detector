@@ -6,6 +6,7 @@ require "dead_code_detector/storage"
 require "dead_code_detector/initializer"
 require "dead_code_detector/configuration"
 require "dead_code_detector/report"
+require "dead_code_detector/method_cacher"
 
 module DeadCodeDetector
 

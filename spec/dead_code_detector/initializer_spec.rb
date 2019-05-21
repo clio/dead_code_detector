@@ -27,7 +27,7 @@ RSpec.describe DeadCodeDetector::Initializer do
     it "marks the class as being tracked" do
       expect do
         described_class.refresh_cache_for(anonymous_class)
-      end.to change{ DeadCodeDetector::Initializer.cached_classes.include?(anonymous_class.name) }
+      end.to change{ DeadCodeDetector::MethodCacher.cached_classes.include?(anonymous_class.name) }
         .from(false)
         .to(true)
     end
@@ -37,7 +37,7 @@ RSpec.describe DeadCodeDetector::Initializer do
       it "doesn't include it in the cached classes" do
         expect do
           described_class.refresh_cache_for(anonymous_class)
-        end.to_not change{ DeadCodeDetector::Initializer.cached_classes }
+        end.to_not change{ DeadCodeDetector::MethodCacher.cached_classes }
       end
     end
   end

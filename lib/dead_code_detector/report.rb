@@ -4,7 +4,7 @@ module DeadCodeDetector
     class << self
 
       def unused_methods
-        Initializer.cached_classes.flat_map do |class_name|
+        MethodCacher.cached_classes.flat_map do |class_name|
           unused_methods_for(class_name)
         end
       end
@@ -22,11 +22,11 @@ module DeadCodeDetector
 
       private
       def unused_class_methods_for(class_name)
-        DeadCodeDetector.config.storage.get(DeadCodeDetector::ClassMethodWrapper.record_key(class_name))
+        MethodCacher.potentially_unused_methods(class_name, delimiter: ClassMethodWrapper.delimiter)
       end
 
       def unused_instance_methods_for(class_name)
-        DeadCodeDetector.config.storage.get(DeadCodeDetector::InstanceMethodWrapper.record_key(class_name))
+        MethodCacher.potentially_unused_methods(class_name, delimiter: InstanceMethodWrapper.delimiter)
       end
     end
 
