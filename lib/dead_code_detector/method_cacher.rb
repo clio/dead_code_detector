@@ -15,6 +15,7 @@ module DeadCodeDetector
       end
 
       def add_class(class_name)
+        return if class_name.nil? || class_name == ""
         @count ||= 0
         @count += 1
         DeadCodeDetector.config.storage.add(tracked_classes_key, "#{class_name}&#{@count}")
@@ -33,7 +34,7 @@ module DeadCodeDetector
         delimited_methods = methods.map do |method_name|
           "#{class_identifier(class_name)}#{delimiter}#{method_name}"
         end
-        DeadCodeDetector.config.storage.add(class_name, delimited_methods)
+        DeadCodeDetector.config.storage.add(tracked_methods_key, delimited_methods)
         method_mapping[class_identifier(class_name)][delimiter] = Set.new(methods)
       end
 
@@ -59,8 +60,10 @@ module DeadCodeDetector
         @method_mapping = Hash.new{|h,k| h[k] = {} }
         DeadCodeDetector.config.storage.get(tracked_methods_key).map do |name|
           match = name.match(/(?<class_identifier>\d+)(?<delimiter>\W)(?<method_name>.*)/)
-          @method_mamping[method[:class_identifier]][match[:delimiter]] ||= Set.new
-          @method_mamping[method[:class_identifier]][match[:delimiter]] << match[:method_name]
+          identifier = match[:class_identifier].to_i
+
+          @method_mapping[identifier][match[:delimiter]] ||= Set.new
+          @method_mapping[identifier][match[:delimiter]] << match[:method_name]
         end
         @method_mapping
       end

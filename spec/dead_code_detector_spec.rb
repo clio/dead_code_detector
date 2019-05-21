@@ -7,6 +7,7 @@ RSpec.describe DeadCodeDetector do
 
   describe ".enable" do
     before do
+      DeadCodeDetector::MethodCacher.clear_cache
       DeadCodeDetector::Initializer.refresh_cache_for(DeadCodeDetector::TestClass)
     end
 
@@ -22,15 +23,14 @@ RSpec.describe DeadCodeDetector do
 
     it "doesn't record method calls outside of the block" do
       DeadCodeDetector.enable {}
-      expect do
-        DeadCodeDetector::TestClass.foo
-      end.to_not(change do
-                   DeadCodeDetector.config.storage.get(
-                     DeadCodeDetector::MethodCacher.send(:tracked_methods_key)
-                   ).length
-                 end)
-
+      DeadCodeDetector::TestClass.foo
       expect(DeadCodeDetector.config.storage.pending_deletions.values.length).to eql 1
+
+      DeadCodeDetector.config.storage.pending_deletions.clear
+
+      expect(DeadCodeDetector.config.storage.get(
+        DeadCodeDetector::MethodCacher.send(:tracked_methods_key)
+      ).length).to eql 1
     end
   end
 end
