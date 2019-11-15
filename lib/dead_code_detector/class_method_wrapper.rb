@@ -59,7 +59,11 @@ module DeadCodeDetector
 
     def owned_method?(method_name)
       original_method = klass.method(method_name)
-      klass.singleton_class <= original_method.owner && !(klass.superclass.singleton_class <= original_method.owner)
+      if klass.respond_to?(:superclass)
+        klass.singleton_class <= original_method.owner && !(klass.superclass.singleton_class <= original_method.owner)
+      else
+        klass.singleton_class <= original_method.owner
+      end
     end
 
   end
