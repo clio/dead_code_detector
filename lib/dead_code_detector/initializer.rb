@@ -57,7 +57,9 @@ module DeadCodeDetector
 
       private
       def descendants_of(parent_class)
-        ObjectSpace.each_object(parent_class.singleton_class).select { |klass| klass < parent_class }
+        ObjectSpace.each_object(parent_class.singleton_class).select do |klass|
+          klass < parent_class && !klass.anonymous?
+        end
       end
 
       def cache_methods_for(klass)

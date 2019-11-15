@@ -53,6 +53,7 @@ module DeadCodeDetector
       return true if DeadCodeDetector.config.ignore_paths.nil?
       source_location = klass.method(method_name).source_location&.first
       return false if source_location.nil?
+      return false if source_location == "(eval)"
       source_location !~ DeadCodeDetector.config.ignore_paths
     end
 
