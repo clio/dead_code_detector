@@ -3,6 +3,8 @@ module DeadCodeDetector
 
     class << self
 
+      attr_accessor :fully_enabled, :last_enabled_class
+
       def refresh_caches
         DeadCodeDetector.config.classes_to_monitor.each do |klass|
           refresh_cache_for(klass)
@@ -10,7 +12,8 @@ module DeadCodeDetector
       end
 
       def refresh_cache_for(klass)
-        @enabled = false
+        self.fully_enabled = false
+        self.last_enabled_class = nil
         classes = [klass, *descendants_of(klass)]
         classes.each do |class_to_enable|
           cache_methods_for(class_to_enable)
@@ -34,13 +37,18 @@ module DeadCodeDetector
       end
 
       def enable_for_cached_classes!
-        return if @enabled
+        return if fully_enabled
         return unless allowed?
-        @enabled = true
-        cached_classes.each do |class_name|
+        classes = cached_classes.sort.to_a
+        starting_index = (classes.index(last_enabled_class) || -1) + 1
+        start_time = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+        classes[starting_index..-1].each do |class_name|
           klass = Object.const_get(class_name) rescue nil
           enable(klass) if klass
+          self.last_enabled_class = class_name
+          return if Process.clock_gettime(Process::CLOCK_MONOTONIC) - start_time > DeadCodeDetector.config.max_seconds_to_enable
         end
+        self.fully_enabled = true
       end
 
       def allowed?
@@ -57,7 +65,9 @@ module DeadCodeDetector
 
       private
       def descendants_of(parent_class)
-        ObjectSpace.each_object(parent_class.singleton_class).select { |klass| klass < parent_class }
+        ObjectSpace.each_object(parent_class.singleton_class).select do |klass|
+          klass < parent_class && !klass.name.nil?
+        end
       end
 
       def cache_methods_for(klass)

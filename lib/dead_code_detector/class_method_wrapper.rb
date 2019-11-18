@@ -53,12 +53,17 @@ module DeadCodeDetector
       return true if DeadCodeDetector.config.ignore_paths.nil?
       source_location = klass.method(method_name).source_location&.first
       return false if source_location.nil?
+      return false if source_location == "(eval)"
       source_location !~ DeadCodeDetector.config.ignore_paths
     end
 
     def owned_method?(method_name)
       original_method = klass.method(method_name)
-      klass.singleton_class <= original_method.owner && !(klass.superclass.singleton_class <= original_method.owner)
+      if klass.respond_to?(:superclass)
+        klass.singleton_class <= original_method.owner && !(klass.superclass.singleton_class <= original_method.owner)
+      else
+        klass.singleton_class <= original_method.owner
+      end
     end
 
   end

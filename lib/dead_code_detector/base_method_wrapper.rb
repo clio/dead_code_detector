@@ -33,7 +33,9 @@ module DeadCodeDetector
 
     def refresh_cache
       clear_cache
-      DeadCodeDetector.config.storage.add(self.class.record_key(klass.name), default_methods)
+      if default_methods.any?
+        DeadCodeDetector.config.storage.add(self.class.record_key(klass.name), default_methods)
+      end
     end
 
     private

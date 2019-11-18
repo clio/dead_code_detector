@@ -42,6 +42,38 @@ RSpec.describe DeadCodeDetector::Initializer do
     end
   end
 
+  describe ".enable_for_cached_classes!" do
+    context "when the process takes longer than the max" do
+      before do
+        allow(DeadCodeDetector::Initializer).to receive(:cached_classes).and_return([anonymous_class.name])
+        allow(DeadCodeDetector.config).to receive(:allowed).and_return(true)
+        allow(DeadCodeDetector.config).to receive(:max_seconds_to_enable).and_return(-1)
+      end
+
+      after do
+        DeadCodeDetector::Initializer.fully_enabled = nil
+        DeadCodeDetector::Initializer.last_enabled_class = nil
+      end
+
+      it "stops when it hits the cutoff" do
+        expect(DeadCodeDetector::Initializer.fully_enabled).to be_falsey
+
+        DeadCodeDetector::Initializer.enable_for_cached_classes!
+
+        expect(DeadCodeDetector::Initializer.fully_enabled).to be_falsey
+        expect(DeadCodeDetector::Initializer.last_enabled_class).to eql anonymous_class.name
+      end
+
+      it "restarts from the last_enabled_class" do
+        expect(DeadCodeDetector::Initializer.fully_enabled).to be_falsey
+        DeadCodeDetector::Initializer.last_enabled_class = anonymous_class.name
+
+        DeadCodeDetector::Initializer.enable_for_cached_classes!
+        expect(DeadCodeDetector::Initializer.fully_enabled).to be_truthy
+      end
+    end
+  end
+
   describe ".enable" do
     before do
       described_class.refresh_cache_for(anonymous_class)

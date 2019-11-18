@@ -1,7 +1,7 @@
 module DeadCodeDetector
   class Configuration
 
-    attr_accessor :redis, :classes_to_monitor, :error_handler, :allowed, :cache_expiry, :ignore_paths
+    attr_accessor :redis, :classes_to_monitor, :error_handler, :allowed, :cache_expiry, :ignore_paths, :max_seconds_to_enable
 
     STORAGE_BACKENDS = {
       memory: Storage::MemoryBackend,
@@ -12,6 +12,7 @@ module DeadCodeDetector
       @allowed = true
       @classes_to_monitor = []
       @cache_expiry = 60 * 60 * 24 * 14
+      @max_seconds_to_enable = 1
     end
 
     def storage=(backend_type)
