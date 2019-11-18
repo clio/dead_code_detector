@@ -40,7 +40,7 @@ module DeadCodeDetector
         return if fully_enabled
         return unless allowed?
         classes = cached_classes.sort.to_a
-        starting_index = (classes.index(@last_enabled_class) || -1) + 1
+        starting_index = (classes.index(last_enabled_class) || -1) + 1
         start_time = Process.clock_gettime(Process::CLOCK_MONOTONIC)
         classes[starting_index..-1].each do |class_name|
           klass = Object.const_get(class_name) rescue nil
