@@ -24,7 +24,7 @@ module DeadCodeDetector
 
     def wrap_method(original_method)
       original_class = klass
-      klass.define_singleton_method(original_method.name) do |*args, &block|
+      klass.define_singleton_method(original_method.name) do |*args, **kwargs, &block|
         begin
           DeadCodeDetector::ClassMethodWrapper.unwrap_method(original_class, original_method)
         rescue StandardError => e
@@ -39,8 +39,7 @@ module DeadCodeDetector
         # is calling the method
         unbound_method = original_method.unbind
         method_bound_to_caller = unbound_method.bind(self)
-        method_bound_to_caller.call(*args, &block)
-      end
+        method_bound_to_caller.call(*args, **kwargs, &block)
     end
 
     def default_methods
