@@ -24,7 +24,7 @@ module DeadCodeDetector
 
     def wrap_method(original_method)
       original_class = klass
-      klass.send(:define_method, original_method.name) do |*args, &block|
+      klass.send(:define_method, original_method.name) do |*args, **kwargs, &block|
         begin
           DeadCodeDetector::InstanceMethodWrapper.unwrap_method(original_class, original_method)
         rescue StandardError => e
@@ -33,7 +33,7 @@ module DeadCodeDetector
           end
         end
         method_bound_to_caller = original_method.bind(self)
-        method_bound_to_caller.call(*args, &block)
+        method_bound_to_caller.call(*args, **kwargs, &block)
       end
     end
 
