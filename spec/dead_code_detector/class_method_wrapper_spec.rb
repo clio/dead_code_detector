@@ -21,7 +21,7 @@ RSpec.describe DeadCodeDetector::ClassMethodWrapper do
         self.counter += 1
       end
       
-      def self.owenership_string(val, name: "Jo")
+      def self.ownership_string(val, name: "Jo")
         "#{name} has #{val} objects"
       end
     end
