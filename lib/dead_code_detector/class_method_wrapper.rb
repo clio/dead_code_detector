@@ -40,6 +40,7 @@ module DeadCodeDetector
         unbound_method = original_method.unbind
         method_bound_to_caller = unbound_method.bind(self)
         method_bound_to_caller.call(*args, **kwargs, &block)
+      end
     end
 
     def default_methods
