@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    dead_code_detector (0.0.10)
+    dead_code_detector (0.0.12)
 
 GEM
   remote: https://rubygems.org/
