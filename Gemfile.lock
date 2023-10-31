@@ -27,7 +27,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  bundler (~> 1.17)
+  bundler
   byebug
   dead_code_detector!
   rake (~> 13.0)
