@@ -14,6 +14,8 @@ Gem::Specification.new do |spec|
   spec.homepage      = "https://github.com/clio/dead_code_detector"
   spec.license       = "MIT"
 
+  spec.required_ruby_version = '>= 3.0.0'
+
   if spec.respond_to?(:metadata)
     spec.metadata["homepage_uri"] = spec.homepage
     spec.metadata["source_code_uri"] = "https://github.com/clio/dead_code_detector"

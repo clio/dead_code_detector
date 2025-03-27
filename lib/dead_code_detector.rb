@@ -7,6 +7,8 @@ require "dead_code_detector/initializer"
 require "dead_code_detector/configuration"
 require "dead_code_detector/report"
 
+require "set"
+
 module DeadCodeDetector
 
   def self.configure(&block)
